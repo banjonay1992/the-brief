@@ -648,9 +648,28 @@ function bestExcerptForCluster(cluster: StoryCluster): string {
   const excerpt = cluster.articles
     .map((article) => article.excerpt)
     .filter((value): value is string => Boolean(value && value.trim().length > 0))
-    .map((value) => trimSentence(value, 240))
+    .map((value) => stripLeadingHeadline(trimSentence(value, 240), cluster.primary.title))
     .find((value) => value.length > 40 && !sameNormalizedText(value, cluster.primary.title));
   return excerpt ?? "";
+}
+
+// Feed excerpts often restate the headline before adding anything new.
+// The summary sits under the headline in the app, so cut the restatement
+// and keep only what the excerpt genuinely adds.
+function stripLeadingHeadline(excerpt: string, headline: string): string {
+  const normalizedExcerpt = excerpt.toLowerCase();
+  const normalizedHeadline = headline.replace(/\s+/g, " ").trim().toLowerCase();
+  if (normalizedHeadline.length < 12 || !normalizedExcerpt.startsWith(normalizedHeadline)) {
+    return excerpt;
+  }
+  const remainder = excerpt
+    .slice(headline.length)
+    .replace(/^[\s.,;:—–-]+/, "")
+    .trim();
+  if (remainder.length < 40) {
+    return remainder.length > 0 ? remainder : excerpt;
+  }
+  return remainder.charAt(0).toUpperCase() + remainder.slice(1);
 }
 
 function articleEvidenceContext(cluster: StoryCluster): string {

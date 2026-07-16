@@ -120,9 +120,66 @@ struct AtmosphereBackground: View {
                 .frame(width: 360, height: 360)
                 .blur(radius: 95)
                 .offset(x: -150, y: 220)
+            RippleField(opacityScale: 0.65 + 0.35 * intensity)
         }
         .ignoresSafeArea()
         .accessibilityHidden(true)
+    }
+}
+
+/// Raindrops on a still lake: every few seconds a drop lands somewhere
+/// and sends out three slow rings that fade as they widen. Drawn on a
+/// Canvas so the whole effect is a handful of strokes per frame.
+/// Sits out entirely when Reduce Motion is on.
+struct RippleField: View {
+    var tint: Color = .white
+    var dropInterval: Double = 5.5
+    var opacityScale: Double = 1.0
+    @State private var born = Date()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let rippleLife = 5.0
+
+    var body: some View {
+        if !reduceMotion {
+            TimelineView(.animation(minimumInterval: 1.0 / 24.0)) { timeline in
+                Canvas { context, size in
+                    let elapsed = timeline.date.timeIntervalSince(born) + 2.5
+                    guard elapsed > 0 else { return }
+                    let life = Self.rippleLife
+                    let firstIndex = max(0, Int((elapsed - life) / dropInterval))
+                    let lastIndex = max(firstIndex, Int(elapsed / dropInterval))
+                    for index in firstIndex...lastIndex {
+                        let spawn = Double(index) * dropInterval + jitter(index, 3) * dropInterval * 0.7
+                        let age = elapsed - spawn
+                        guard age > 0, age < life else { continue }
+                        let x = (0.10 + 0.80 * jitter(index, 1)) * size.width
+                        let y = (0.08 + 0.74 * jitter(index, 2)) * size.height
+                        for ring in 0..<3 {
+                            let ringDelay = Double(ring) * 0.55
+                            let progress = (age - ringDelay) / (life - ringDelay)
+                            guard progress > 0, progress < 1 else { continue }
+                            let eased = 1 - pow(1 - progress, 2.2)
+                            let radius = 8 + eased * 150
+                            let alpha = pow(1 - progress, 1.7) * 0.45 * opacityScale
+                            let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
+                            context.stroke(
+                                Circle().path(in: rect),
+                                with: .color(tint.opacity(alpha)),
+                                lineWidth: max(0.6, 1.9 - eased * 1.2)
+                            )
+                        }
+                    }
+                }
+            }
+            .allowsHitTesting(false)
+        }
+    }
+
+    /// Deterministic 0..1 noise per drop so the rain has no schedule state.
+    private func jitter(_ index: Int, _ salt: Int) -> Double {
+        let raw = sin(Double(index &* 127 &+ salt &* 311) * 12.9898) * 43758.5453
+        return raw - raw.rounded(.down)
     }
 }
 
@@ -471,15 +528,17 @@ struct CascadingText: View {
     var textAlignment: TextAlignment = .center
 
     @State private var isVisible = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(Array(text.enumerated()), id: \.offset) { index, character in
                 Text(String(character))
-                    .opacity(isVisible ? 1 : 0)
-                    .offset(y: isVisible ? 0 : 5)
+                    .opacity(isVisible || reduceMotion ? 1 : 0)
+                    .blur(radius: isVisible || reduceMotion ? 0 : 1.6)
+                    .offset(y: isVisible || reduceMotion ? 0 : 5)
                     .animation(
-                        .easeOut(duration: 0.26).delay(CalmTextTiming.letterDelay(index: index)),
+                        .easeOut(duration: 0.34).delay(CalmTextTiming.letterDelay(index: index)),
                         value: isVisible
                     )
                     .calmLetterScrollReveal(index: index)
@@ -492,6 +551,96 @@ struct CascadingText: View {
         .onAppear {
             isVisible = true
         }
+    }
+}
+
+/// Per-word fade-in for text that has to wrap: each word settles into
+/// place with a soft blur and rise, a beat after the one before it.
+struct CalmWordsText: View {
+    let text: String
+    var font: Font
+    var color: Color = .signalInk
+    var wordSpacing: CGFloat = 6
+    var lineSpacing: CGFloat = 3
+    var maxCharacters: Int? = nil
+
+    @State private var isVisible = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var words: [String] {
+        let display: String
+        if let maxCharacters, text.count > maxCharacters {
+            let prefix = String(text.prefix(maxCharacters))
+            let cut = prefix.lastIndex(of: " ").map { String(prefix[..<$0]) } ?? prefix
+            display = cut + "…"
+        } else {
+            display = text
+        }
+        return display.split(separator: " ").map(String.init)
+    }
+
+    var body: some View {
+        FlowLayout(spacing: wordSpacing, lineSpacing: lineSpacing) {
+            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                Text(word)
+                    .font(font)
+                    .foregroundStyle(color)
+                    .opacity(isVisible || reduceMotion ? 1 : 0)
+                    .blur(radius: isVisible || reduceMotion ? 0 : 2.0)
+                    .offset(y: isVisible || reduceMotion ? 0 : 7)
+                    .animation(
+                        .easeOut(duration: 0.5).delay(Double(index) * 0.055),
+                        value: isVisible
+                    )
+            }
+        }
+        .onAppear {
+            isVisible = true
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+    }
+}
+
+/// Minimal left-aligned wrapping layout so CalmWordsText can animate
+/// word views individually while still flowing like a paragraph.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 5
+    var lineSpacing: CGFloat = 4
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        frames(maxWidth: proposal.width ?? .infinity, subviews: subviews).size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let layout = frames(maxWidth: bounds.width, subviews: subviews)
+        for (frame, view) in zip(layout.frames, subviews) {
+            view.place(
+                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                proposal: ProposedViewSize(frame.size)
+            )
+        }
+    }
+
+    private func frames(maxWidth: CGFloat, subviews: Subviews) -> (frames: [CGRect], size: CGSize) {
+        var frames: [CGRect] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var lineHeight: CGFloat = 0
+        var widest: CGFloat = 0
+        for view in subviews {
+            let size = view.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > maxWidth {
+                x = 0
+                y += lineHeight + lineSpacing
+                lineHeight = 0
+            }
+            frames.append(CGRect(origin: CGPoint(x: x, y: y), size: size))
+            x += size.width + spacing
+            lineHeight = max(lineHeight, size.height)
+            widest = max(widest, x - spacing)
+        }
+        return (frames, CGSize(width: widest, height: y + lineHeight))
     }
 }
 

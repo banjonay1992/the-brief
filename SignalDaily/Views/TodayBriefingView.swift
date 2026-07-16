@@ -411,13 +411,12 @@ private struct LeadStoryGlassCard: View {
                     StoryThreadMarker(info: threadInfo)
                 }
 
-                Text(story.headline)
-                    .font(.system(size: 23, weight: .medium, design: .serif))
-                    .foregroundStyle(Color.signalInk)
-                    .lineSpacing(2)
-                    .lineLimit(4)
-                    .minimumScaleFactor(0.82)
-                    .layoutPriority(1)
+                CalmWordsText(
+                    text: story.headline,
+                    font: .system(size: 23, weight: .medium, design: .serif),
+                    maxCharacters: 96
+                )
+                .layoutPriority(1)
 
                 Text(story.summary)
                     .font(.system(size: 15))
@@ -557,11 +556,12 @@ private struct BriefingQueueCompleteCard: View {
             }
             .padding(.bottom, 14)
 
-            Text(RitualCopy.sealedTitle)
-                .font(.system(size: 30, weight: .regular, design: .serif))
-                .foregroundStyle(Color.signalInk)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 6)
+            CascadingText(
+                text: RitualCopy.sealedTitle,
+                font: .system(size: 30, weight: .regular, design: .serif),
+                color: .signalInk
+            )
+            .padding(.bottom, 6)
 
             Text(RitualCopy.sealedSubtitle)
                 .font(.subheadline)
