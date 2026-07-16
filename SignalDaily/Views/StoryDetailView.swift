@@ -23,17 +23,17 @@ struct StoryDetailView: View {
                     .padding(.bottom, 24)
                 }
                 .signalScreen()
-                .task {
-                    todayViewModel.markRead(storyID)
-                    await todayViewModel.loadStory(id: storyID)
-                }
             } else {
                 EmptyStateView(
-                    title: "Article unavailable",
-                    message: "This story could not be opened. Try again shortly.",
+                    title: "Opening the story",
+                    message: "Fetching the full evidence notes.",
                     systemImage: "doc.text.magnifyingglass"
                 )
             }
+        }
+        .task(id: storyID) {
+            todayViewModel.markRead(storyID)
+            await todayViewModel.loadStory(id: storyID)
         }
         .navigationTitle("Story")
         .navigationBarTitleDisplayMode(.inline)
