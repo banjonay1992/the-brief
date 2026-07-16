@@ -35,9 +35,9 @@ struct SavedStoriesView: View {
             .padding(.top, savedStoriesStore.savedStoryIDs.isEmpty ? SavedStoriesLayout.emptyStateTopPadding : 0)
         }
         .calmWater(intensity: 0.55)
-        .navigationTitle("Saved")
-        .toolbarBackground(Color.signalBackground, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .task { await todayViewModel.loadToday() }
     }
 }

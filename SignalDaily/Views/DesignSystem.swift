@@ -429,6 +429,16 @@ enum BriefDate {
     }
 }
 
+enum StoryKicker {
+    /// "Asia · Science & Tech", collapsing to one word when region and
+    /// category are the same ("World · World" → "World").
+    static func text(region: String, category: String) -> String {
+        region.caseInsensitiveCompare(category) == .orderedSame
+            ? region
+            : "\(region) · \(category)"
+    }
+}
+
 enum RitualCopy {
     static let sealedTitle = "Today is sealed."
     static let sealedSubtitle = "Nothing more is asked of you."

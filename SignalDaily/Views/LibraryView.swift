@@ -55,9 +55,9 @@ struct LibraryView: View {
             .padding(.top, readingLedger.totalReadCount == 0 ? SavedStoriesLayout.emptyStateTopPadding : 34)
         }
         .calmWater(intensity: 0.55)
-        .navigationTitle("Library")
-        .toolbarBackground(Color.signalBackground, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         .task { await todayViewModel.loadToday() }
     }
 
@@ -197,7 +197,7 @@ private struct LibraryStoryRow: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
-                Text("\(record.story.region) · \(record.story.category)")
+                Text(StoryKicker.text(region: record.story.region, category: record.story.category))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(accent)
 

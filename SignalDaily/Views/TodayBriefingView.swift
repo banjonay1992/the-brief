@@ -384,9 +384,7 @@ private struct LeadStoryGlassCard: View {
     }
 
     private var kickerText: String {
-        story.region.caseInsensitiveCompare(story.category) == .orderedSame
-            ? story.region
-            : "\(story.region) · \(story.category)"
+        StoryKicker.text(region: story.region, category: story.category)
     }
 
     var body: some View {
@@ -1139,7 +1137,7 @@ struct StoryCardView: View {
                     .font(.headline)
                     .foregroundStyle(Color.signalInk)
                     .multilineTextAlignment(.center)
-                Text("\(story.region) · \(story.category)")
+                Text(StoryKicker.text(region: story.region, category: story.category))
                     .font(.caption)
                     .foregroundStyle(Color.signalMuted)
                     .multilineTextAlignment(.center)
