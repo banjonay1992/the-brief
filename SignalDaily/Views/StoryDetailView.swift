@@ -14,23 +14,15 @@ struct StoryDetailView: View {
             if let story {
                 let accent = CategoryStyle.tint(for: story.category)
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 18) {
                         storyHeader(story, accent: accent)
                         leadPanel(story, accent: accent)
-                        evidencePanel(story, accent: accent)
-                        actionGrid(story)
+                        evidenceCard(story)
+                        linksCard(story)
                         saveButton(story)
                     }
                     .padding(20)
                     .padding(.bottom, 28)
-                }
-                .background(alignment: .top) {
-                    Circle()
-                        .fill(accent.opacity(0.14))
-                        .frame(width: 340, height: 340)
-                        .blur(radius: 70)
-                        .offset(y: -140)
-                        .accessibilityHidden(true)
                 }
             } else {
                 EmptyStateView(
@@ -47,8 +39,7 @@ struct StoryDetailView: View {
         .signalScreen()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.signalBackground, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
     }
 
@@ -85,6 +76,14 @@ struct StoryDetailView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .background {
+            Circle()
+                .fill(accent.opacity(0.13))
+                .frame(width: 320, height: 320)
+                .blur(radius: 75)
+                .offset(y: -60)
+                .accessibilityHidden(true)
+        }
     }
 
     private func intensityText(_ load: EmotionalLoad) -> String {
@@ -126,38 +125,92 @@ struct StoryDetailView: View {
         .calmScrollReveal()
     }
 
-    private func evidencePanel(_ story: StoryDetail, accent: Color) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            detailSection("What we know", accent: .signalSage) {
-                bulletList(story.whatWeKnow, tint: .signalSage)
+    private func evidenceCard(_ story: StoryDetail) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center) {
+                Text("Evidence")
+                    .font(.caption.weight(.semibold))
+                    .tracking(1.6)
+                    .textCase(.uppercase)
+                    .foregroundStyle(Color.signalPowderDeep)
+                Spacer()
+                MetadataPill(text: story.confidence.rating.rawValue, tint: .signalPowderDeep)
             }
 
-            Rectangle()
-                .fill(Color.signalLine.opacity(0.6))
-                .frame(height: 1)
+            Text(story.confidence.reason)
+                .font(.subheadline)
+                .lineSpacing(3)
+                .foregroundStyle(Color.signalMuted)
 
-            detailSection("What is unclear", accent: .signalOchre) {
-                bulletList(story.whatIsUnclear, tint: .signalOchre)
-            }
-
-            Rectangle()
-                .fill(Color.signalLine.opacity(0.6))
-                .frame(height: 1)
-
-            detailSection("Evidence confidence", accent: .signalPowderDeep) {
-                HStack(alignment: .top, spacing: 12) {
-                    Text(story.confidence.reason)
-                        .font(.subheadline)
-                        .lineSpacing(3)
-                        .foregroundStyle(Color.signalMuted)
-                    Spacer(minLength: 0)
-                    MetadataPill(text: story.confidence.rating.rawValue, tint: .signalPowderDeep)
+            DisclosureGroup {
+                VStack(alignment: .leading, spacing: 14) {
+                    detailSection("What we know", accent: .signalSage) {
+                        bulletList(story.whatWeKnow, tint: .signalSage)
+                    }
+                    detailSection("What is unclear", accent: .signalOchre) {
+                        bulletList(story.whatIsUnclear, tint: .signalOchre)
+                    }
                 }
+                .padding(.top, 12)
+            } label: {
+                Text("What we know · what is unclear")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.signalInk)
             }
+            .tint(Color.signalSage)
+            .padding(.top, 2)
         }
         .padding(18)
         .signalInsetPanel()
         .calmScrollReveal()
+    }
+
+    private func linksCard(_ story: StoryDetail) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            linkRow("Evidence check", "checkmark.shield", nil, .evidenceCheck(story.id))
+            rowDivider
+            linkRow("Sources", "doc.text", nil, .sources(story.id))
+            rowDivider
+            linkRow("Framing", "book", nil, .biasExplanation(story.id))
+            rowDivider
+            linkRow("Depth", "square.stack.3d.up", "\(todayViewModel.depthTokenStatus.remaining) left", .depthAnalysis(story.id))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+        .signalInsetPanel()
+        .calmScrollReveal()
+    }
+
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(Color.signalLine.opacity(0.5))
+            .frame(height: 1)
+    }
+
+    private func linkRow(_ title: String, _ image: String, _ value: String?, _ route: AppRoute) -> some View {
+        NavigationLink(value: route) {
+            HStack(spacing: 12) {
+                Image(systemName: image)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.signalSage)
+                    .frame(width: 22)
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.signalInk)
+                Spacer()
+                if let value {
+                    Text(value)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Color.signalMuted)
+                }
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.signalMuted.opacity(0.5))
+            }
+            .padding(.vertical, 13)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -234,24 +287,4 @@ struct StoryDetailView: View {
         )
     }
 
-    private func actionGrid(_ story: StoryDetail) -> some View {
-        Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-            GridRow {
-                detailLink("Evidence Check", "checkmark.shield", nil, .evidenceCheck(story.id))
-                detailLink("Sources", "doc.text", nil, .sources(story.id))
-            }
-            GridRow {
-                detailLink("Framing", "book", nil, .biasExplanation(story.id))
-                detailLink("Depth", "square.stack.3d.up", "\(todayViewModel.depthTokenStatus.remaining) left", .depthAnalysis(story.id))
-            }
-        }
-        .calmScrollReveal()
-    }
-
-    private func detailLink(_ title: String, _ image: String, _ subtitle: String?, _ route: AppRoute) -> some View {
-        NavigationLink(value: route) {
-            ActionTile(title: title, systemImage: image, subtitle: subtitle)
-        }
-        .buttonStyle(.plain)
-    }
 }
