@@ -160,13 +160,13 @@ struct RippleField: View {
                             let progress = (age - ringDelay) / (life - ringDelay)
                             guard progress > 0, progress < 1 else { continue }
                             let eased = 1 - pow(1 - progress, 2.2)
-                            let radius = 8 + eased * 150
-                            let alpha = pow(1 - progress, 1.7) * 0.45 * opacityScale
+                            let radius = 8 + eased * 165
+                            let alpha = pow(1 - progress, 1.7) * 0.55 * opacityScale
                             let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
                             context.stroke(
                                 Circle().path(in: rect),
                                 with: .color(tint.opacity(alpha)),
-                                lineWidth: max(0.6, 1.9 - eased * 1.2)
+                                lineWidth: max(1.1, 3.6 - eased * 2.2)
                             )
                         }
                     }
@@ -180,6 +180,89 @@ struct RippleField: View {
     private func jitter(_ index: Int, _ salt: Int) -> Double {
         let raw = sin(Double(index &* 127 &+ salt &* 311) * 12.9898) * 43758.5453
         return raw - raw.rounded(.down)
+    }
+}
+
+/// The water itself. When a drop lands: the sky underneath gets a true
+/// per-pixel ripple (Metal displacement — pure SwiftUI layers only, since
+/// shader effects can't rasterize UIKit-backed views like ScrollView), and
+/// the UI above gets a damped physical sway — a small lift, tilt, and
+/// settle synced to the same wave. Ambient drops fall every few seconds;
+/// screens can land one on demand (marking a story done). Reduce Motion
+/// stills the water completely.
+struct CalmWaterModifier: ViewModifier {
+    var atmosphereIntensity: Double = 1.0
+    /// Bump to land a drop at `dropPoint` (unit coordinates).
+    var dropTrigger: Int = 0
+    var dropPoint: UnitPoint = UnitPoint(x: 0.5, y: 0.45)
+
+    @State private var origin = UnitPoint(x: 0.5, y: 0.4)
+    @State private var dropStart: Date? = nil
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let waveLife: TimeInterval = 2.6
+    private let ambientTimer = Timer.publish(every: 8.5, on: .main, in: .common).autoconnect()
+
+    func body(content: Content) -> some View {
+        GeometryReader { proxy in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: pausedNow)) { timeline in
+                let time = activeTime(at: timeline.date)
+                let envelope = reduceMotion ? 0 : exp(-1.9 * time)
+                let wave = sin(8.5 * time) * envelope
+                let settle = sin(6.0 * time + 0.9) * envelope
+                content
+                    .offset(y: wave * 3.2)
+                    .rotationEffect(.degrees(settle * 0.35), anchor: .init(x: origin.x, y: origin.y))
+                    .scaleEffect(1 + wave * 0.0035, anchor: .center)
+                    .background {
+                        AtmosphereBackground(intensity: atmosphereIntensity)
+                            .distortionEffect(
+                                ShaderLibrary.calmRipple(
+                                    .float2(origin.x * proxy.size.width, origin.y * proxy.size.height),
+                                    .float(time),
+                                    .float(reduceMotion ? 0 : 14),
+                                    .float(11),
+                                    .float(2.1),
+                                    .float(1300)
+                                ),
+                                maxSampleOffset: CGSize(width: 16, height: 16)
+                            )
+                    }
+            }
+        }
+        .onReceive(ambientTimer) { _ in
+            guard !reduceMotion else { return }
+            origin = UnitPoint(x: .random(in: 0.15...0.85), y: .random(in: 0.12...0.75))
+            dropStart = Date()
+        }
+        .onChange(of: dropTrigger) { _, _ in
+            guard !reduceMotion else { return }
+            origin = dropPoint
+            dropStart = Date()
+        }
+    }
+
+    private var pausedNow: Bool {
+        guard !reduceMotion, let dropStart else { return true }
+        return Date().timeIntervalSince(dropStart) > Self.waveLife
+    }
+
+    private func activeTime(at date: Date) -> Double {
+        guard let dropStart else { return Self.waveLife }
+        return min(max(date.timeIntervalSince(dropStart), 0), Self.waveLife)
+    }
+}
+
+extension View {
+    /// Sits the screen on water: supplies the atmosphere background with a
+    /// true ripple distortion, sways the UI with each drop, and lands an
+    /// on-demand drop whenever `drop` changes. Replaces `signalAtmosphere`.
+    func calmWater(
+        intensity: Double = 1.0,
+        drop: Int = 0,
+        at point: UnitPoint = UnitPoint(x: 0.5, y: 0.45)
+    ) -> some View {
+        modifier(CalmWaterModifier(atmosphereIntensity: intensity, dropTrigger: drop, dropPoint: point))
     }
 }
 

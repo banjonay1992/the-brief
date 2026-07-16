@@ -12,6 +12,7 @@
 		0CD269BF37FD025DC2925324 /* SubscriptionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361E56F9157BC3F84A6E96DC /* SubscriptionStoreTests.swift */; };
 		1DFAA42F34A6B3C2FA3CF173 /* AppIconAssetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C5B344235DD8EDA2691D8B /* AppIconAssetTests.swift */; };
 		247008389CE7BA06DE3670C8 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A907433B8B214EB9E29BC3F /* SubscriptionService.swift */; };
+		2A4EC49594D5E3E37449077A /* RippleEffects.metal in Sources */ = {isa = PBXBuildFile; fileRef = 9167D4991A44E6C784A12902 /* RippleEffects.metal */; };
 		3379A911C50F78879724AA8E /* SavedStoriesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEBC62844FBA3B08370E2933 /* SavedStoriesStore.swift */; };
 		33C0C756F42664B3C5A558C9 /* mock-story.json in Resources */ = {isa = PBXBuildFile; fileRef = 0358820AECD95FED2BF54A04 /* mock-story.json */; };
 		347177E18F23E6DD17C35627 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A7DD81DF2102D1B553C7EF /* SettingsView.swift */; };
@@ -98,6 +99,7 @@
 		814075056741E1C2297D2179 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		84988FAB16B54E41561811A3 /* TodayBriefingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayBriefingView.swift; sourceTree = "<group>"; };
 		8AE2926F158C1FD9D5D1A0CC /* AppShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShellView.swift; sourceTree = "<group>"; };
+		9167D4991A44E6C784A12902 /* RippleEffects.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = RippleEffects.metal; sourceTree = "<group>"; };
 		9A25B1AFD73D4245E54E4D2E /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
 		A85567FAFEBAB17E633E92FC /* FileBriefingCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBriefingCacheTests.swift; sourceTree = "<group>"; };
 		A9FF7711B4769290D12AF803 /* SignalDailyTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SignalDailyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -182,6 +184,7 @@
 				20B4FD20A4EE4EA58A4CAA44 /* LibraryView.swift */,
 				25CE63CD71EBEAA55E739E9E /* OnboardingView.swift */,
 				F561B776E75326B9A5B31142 /* PreferencesSetupView.swift */,
+				9167D4991A44E6C784A12902 /* RippleEffects.metal */,
 				D36FD9D72B0BAA6FC304EF62 /* SavedStoriesView.swift */,
 				330550583DFF6FC4FDA63C9F /* SectionDetailView.swift */,
 				B9A7DD81DF2102D1B553C7EF /* SettingsView.swift */,
@@ -395,6 +398,7 @@
 				BE4CE9D9557D31B705DEEAEA /* PreferencesSetupView.swift in Sources */,
 				DB3C2526ECAE0B60A46FA61D /* PreferencesStore.swift in Sources */,
 				84C6547EE728EACB8E64EACA /* ReadingLedger.swift in Sources */,
+				2A4EC49594D5E3E37449077A /* RippleEffects.metal in Sources */,
 				3379A911C50F78879724AA8E /* SavedStoriesStore.swift in Sources */,
 				BAF52AD2BBEEE962F9DEEFA2 /* SavedStoriesView.swift in Sources */,
 				CF00158FBD9ACC3C8EC0D6C6 /* SectionDetailView.swift in Sources */,

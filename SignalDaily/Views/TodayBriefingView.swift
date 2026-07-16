@@ -57,7 +57,7 @@ struct TodayBriefingView: View {
             .padding(.top, 10)
             .padding(.bottom, 16)
         }
-        .signalAtmosphere()
+        .calmWater(drop: viewModel.readableStoryCount, at: UnitPoint(x: 0.5, y: 0.55))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)

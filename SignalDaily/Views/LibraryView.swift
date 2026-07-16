@@ -54,7 +54,7 @@ struct LibraryView: View {
             .padding(20)
             .padding(.top, readingLedger.totalReadCount == 0 ? SavedStoriesLayout.emptyStateTopPadding : 34)
         }
-        .signalAtmosphere(intensity: 0.55)
+        .calmWater(intensity: 0.55)
         .navigationTitle("Library")
         .toolbarBackground(Color.signalBackground, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
