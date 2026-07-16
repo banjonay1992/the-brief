@@ -383,11 +383,17 @@ private struct LeadStoryGlassCard: View {
         CategoryStyle.tint(for: story.category)
     }
 
+    private var kickerText: String {
+        story.region.caseInsensitiveCompare(story.category) == .orderedSame
+            ? story.region
+            : "\(story.region) · \(story.category)"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top) {
-                    Text("\(story.region) · \(story.category)")
+                    Text(kickerText)
                         .font(.caption.weight(.semibold))
                         .tracking(2.0)
                         .textCase(.uppercase)
@@ -406,11 +412,11 @@ private struct LeadStoryGlassCard: View {
                 }
 
                 Text(story.headline)
-                    .font(.system(size: 28, weight: .regular, design: .serif))
+                    .font(.system(size: 23, weight: .medium, design: .serif))
                     .foregroundStyle(Color.signalInk)
-                    .lineSpacing(1)
+                    .lineSpacing(2)
                     .lineLimit(4)
-                    .minimumScaleFactor(0.78)
+                    .minimumScaleFactor(0.82)
                     .layoutPriority(1)
 
                 Text(story.summary)
