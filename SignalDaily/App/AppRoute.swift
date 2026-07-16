@@ -8,9 +8,8 @@ enum AppRoute: Hashable {
     case evidenceCheck(String)
     case depthAnalysis(String)
     case sources(String)
-    case biasExplanation(String)
+    case biasExplanation(String?)
     case subscription
-    case complete
 }
 
 enum AppTab: String, CaseIterable, Identifiable {

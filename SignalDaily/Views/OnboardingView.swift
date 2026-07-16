@@ -6,16 +6,25 @@ struct OnboardingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Welcome to The Brief")
-                        .font(.largeTitle.bold())
+                VStack(alignment: .center, spacing: 10) {
+                    CascadingText(
+                        text: "The Brief",
+                        font: .system(size: 40, weight: .regular, design: .serif),
+                        color: .signalInk
+                    )
                     Text("News without the nervous breakdown.")
                         .font(.title3)
                         .foregroundStyle(Color.signalMuted)
-                    Text("Get one calm briefing each day, with evidence checks, source transparency, and no infinite feed.")
+                        .multilineTextAlignment(.center)
+                    Text("One calm briefing each day, with evidence checks, source transparency, and no infinite feed.")
+                        .font(.subheadline)
                         .foregroundStyle(Color.signalMuted)
+                        .multilineTextAlignment(.center)
                 }
-                .signalCard()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                .padding(.horizontal, 20)
+                .signalGlassCard(tint: .signalPowder)
 
                 VStack(alignment: .leading, spacing: 14) {
                     principle("Evidence before alignment", "Claims are attributed and confidence is based on verification, not geopolitical familiarity.")
@@ -46,8 +55,9 @@ struct OnboardingView: View {
             .padding(20)
         }
         .signalScreen()
-        .navigationTitle("Onboarding")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private func principle(_ title: String, _ body: String) -> some View {

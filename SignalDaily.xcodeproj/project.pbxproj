@@ -31,7 +31,6 @@
 		6C7DAB1746E59AF7B7A2E274 /* CalmTextTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C66F9030C3F1F4B84757E8 /* CalmTextTimingTests.swift */; };
 		72209A567D69C038FBADE799 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502942AE3C57CD32A4EDA0D2 /* TodayViewModel.swift */; };
 		72346AC6A963711ED6717A78 /* AuthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF1438689009C872159DBF1 /* AuthStoreTests.swift */; };
-		823B721DF5CCAD0B8EF6ADD1 /* BriefingCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB30E89A83283B978E95EF6A /* BriefingCompleteView.swift */; };
 		832018AE0DC96FF0EBC06826 /* NewsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0724EAA4BE0F139AA5FE3EF0 /* NewsModelTests.swift */; };
 		84C6547EE728EACB8E64EACA /* ReadingLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DD4EAA2DFFC54E53C22660 /* ReadingLedger.swift */; };
 		8AF533C76529E21C9D54A6A9 /* DepthAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E693BBEE17E07E9246DACF9 /* DepthAnalysisView.swift */; };
@@ -121,7 +120,6 @@
 		E1F891073B9B4AD89FFAFAF8 /* NewsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsModels.swift; sourceTree = "<group>"; };
 		E80FABB039B80B29D5353428 /* TodayViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModelTests.swift; sourceTree = "<group>"; };
 		F561B776E75326B9A5B31142 /* PreferencesSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesSetupView.swift; sourceTree = "<group>"; };
-		FB30E89A83283B978E95EF6A /* BriefingCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingCompleteView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -178,7 +176,6 @@
 			children = (
 				7B5D1F3C6FC75465C80D0BFE /* AuthView.swift */,
 				6071B35FD375CE220FE40784 /* BiasFramingExplanationView.swift */,
-				FB30E89A83283B978E95EF6A /* BriefingCompleteView.swift */,
 				3E693BBEE17E07E9246DACF9 /* DepthAnalysisView.swift */,
 				814075056741E1C2297D2179 /* DesignSystem.swift */,
 				2CA68A97C3E8B300EB4466E3 /* EvidenceCheckView.swift */,
@@ -387,7 +384,6 @@
 				BBC6A26F2A92FAEFA2BF6F35 /* AuthView.swift in Sources */,
 				6872968B9DC82F3CDD994F53 /* BiasFramingExplanationView.swift in Sources */,
 				603DDEC438AF0D9A28C8008E /* BriefingAPIClient.swift in Sources */,
-				823B721DF5CCAD0B8EF6ADD1 /* BriefingCompleteView.swift in Sources */,
 				8AF533C76529E21C9D54A6A9 /* DepthAnalysisView.swift in Sources */,
 				574DFB1BDECDA26CA720537D /* DesignSystem.swift in Sources */,
 				C1A3203718C3538A3EC5C396 /* EvidenceCheckView.swift in Sources */,

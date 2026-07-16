@@ -22,6 +22,10 @@ final class TodayViewModel {
     var loadingState: LoadingState = .idle
     var selectedMode: BriefingMode = .balanced
 
+    /// The day's deck is finite even when the feed upstream is not.
+    /// Mirrors the user's "max stories" preference.
+    var maxStories: Int = UserPreferences.defaults.maxStories
+
     init(service: BriefingServing = MockBriefingService(), cache: BriefingCaching = FileBriefingCache()) {
         self.service = service
         self.cache = cache
@@ -58,14 +62,19 @@ final class TodayViewModel {
         storyDetail(id: id)?.evidenceCheck
     }
 
+    /// Today's finite deck: the top-ranked stories up to the user's cap.
+    var dayStories: [StorySummary] {
+        guard let briefing else { return [] }
+        return Array(briefing.allStories.sortedByBriefingRank().prefix(max(maxStories, 1)))
+    }
+
     var readProgressText: String {
-        guard let briefing else { return "No stories read yet" }
-        return "\(readStoryIDs.intersection(Set(briefing.allStories.map(\.id))).count)/\(briefing.allStories.count) read"
+        guard briefing != nil else { return "No stories read yet" }
+        return "\(readableStoryCount)/\(dayStories.count) read"
     }
 
     var readableStoryCount: Int {
-        guard let briefing else { return 0 }
-        return readStoryIDs.intersection(Set(briefing.allStories.map(\.id))).count
+        readStoryIDs.intersection(Set(dayStories.map(\.id))).count
     }
 
     func shouldPromptForSubscription(hasAccess: Bool) -> Bool {
@@ -77,8 +86,8 @@ final class TodayViewModel {
     }
 
     func storyQueue(savedStoryIDs: Set<String>, now: Date = .now) -> [StorySummary] {
-        guard let briefing else { return [] }
-        let stories = briefing.allStories.sortedByBriefingRank()
+        guard briefing != nil else { return [] }
+        let stories = dayStories
         let byID = Dictionary(uniqueKeysWithValues: stories.map { ($0.id, $0) })
         let updatedIDs = updates?.updates.compactMap(\.storyId) ?? []
         var seen = Set<String>()
@@ -95,10 +104,7 @@ final class TodayViewModel {
     }
 
     var doneStories: [StorySummary] {
-        guard let briefing else { return [] }
-        return briefing.allStories
-            .sortedByBriefingRank()
-            .filter { readStoryIDs.contains($0.id) }
+        dayStories.filter { readStoryIDs.contains($0.id) }
     }
 
     func loadStory(id: String) async {

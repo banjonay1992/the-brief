@@ -152,6 +152,15 @@ enum SavedStoriesLayout {
     static let emptyStateTopPadding: CGFloat = 76
 }
 
+@MainActor
+enum BriefDate {
+    /// "2026-05-17" → "17 May 2026"; falls back to the raw string.
+    static func display(_ isoDay: String) -> String {
+        guard let date = ReadingLedger.dayFormatter.date(from: isoDay) else { return isoDay }
+        return date.formatted(.dateTime.day().month(.wide).year())
+    }
+}
+
 enum RitualCopy {
     static let sealedTitle = "Today is sealed."
     static let sealedSubtitle = "Nothing more is asked of you."
@@ -183,15 +192,33 @@ struct ReadingThread: View {
     let total: Int
     let read: Int
 
+    /// Above this, one segment per story stops being legible (and the rigid
+    /// inter-segment spacing would force the layout wider than the screen),
+    /// so the thread becomes a single continuous line.
+    private static let segmentLimit = 16
+
     var body: some View {
         if total > 0 {
             HStack(spacing: 10) {
-                HStack(spacing: 4) {
-                    ForEach(0..<total, id: \.self) { index in
-                        Capsule()
-                            .fill(index < read ? Color.signalPowderDeep.opacity(0.85) : Color.signalLine.opacity(0.7))
-                            .frame(height: 3.5)
+                if total <= Self.segmentLimit {
+                    HStack(spacing: 4) {
+                        ForEach(0..<total, id: \.self) { index in
+                            Capsule()
+                                .fill(index < read ? Color.signalPowderDeep.opacity(0.85) : Color.signalLine.opacity(0.7))
+                                .frame(height: 3.5)
+                        }
                     }
+                } else {
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.signalLine.opacity(0.7))
+                        GeometryReader { proxy in
+                            Capsule()
+                                .fill(Color.signalPowderDeep.opacity(0.85))
+                                .frame(width: proxy.size.width * CGFloat(min(read, total)) / CGFloat(total))
+                        }
+                    }
+                    .frame(height: 3.5)
                 }
                 Text("\(read) of \(total)")
                     .font(.caption2.weight(.medium))

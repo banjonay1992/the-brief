@@ -27,12 +27,17 @@ struct LibraryView: View {
                     LibraryTallyCard(
                         stories: readingLedger.totalReadCount,
                         days: readingLedger.readingDayCount,
-                        calmMornings: readingLedger.calmMorningCount
+                        calmMornings: readingLedger.calmMorningCount,
+                        mixLine: confidenceMixLine
                     )
                     .calmScrollReveal()
 
                     LazyVStack(alignment: .leading, spacing: 10) {
-                        ForEach(readingLedger.recordsByDay, id: \.date) { day in
+                        ForEach(Array(readingLedger.recordsByDay.enumerated()), id: \.element.date) { index, day in
+                            if let month = monthDividerText(at: index) {
+                                LibraryMonthDivider(text: month)
+                                    .padding(.top, 18)
+                            }
                             LibraryDayHeader(date: day.date)
                                 .padding(.top, 12)
                             ForEach(day.records) { record in
@@ -55,12 +60,57 @@ struct LibraryView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .task { await todayViewModel.loadToday() }
     }
+
+    /// "Mostly high-confidence reading" once there's enough history to mean it.
+    private var confidenceMixLine: String? {
+        let records = readingLedger.readRecords
+        guard records.count >= 5 else { return nil }
+        let counts = Dictionary(grouping: records, by: \.story.confidence)
+        guard let (rating, matching) = counts.max(by: { $0.value.count < $1.value.count }),
+              matching.count * 2 > records.count
+        else { return nil }
+        return "Mostly \(rating.rawValue.lowercased())-confidence reading"
+    }
+
+    /// A month divider appears above the first day of each month,
+    /// but only once the library spans more than one month.
+    private func monthDividerText(at index: Int) -> String? {
+        let days = readingLedger.recordsByDay
+        let months = Set(days.map { String($0.date.prefix(7)) })
+        guard months.count > 1 else { return nil }
+        let month = String(days[index].date.prefix(7))
+        if index == 0 || String(days[index - 1].date.prefix(7)) != month {
+            guard let parsed = ReadingLedger.dayFormatter.date(from: "\(month)-01") else { return nil }
+            return parsed.formatted(.dateTime.month(.wide).year())
+        }
+        return nil
+    }
+}
+
+private struct LibraryMonthDivider: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(Color.signalLine.opacity(0.6))
+                .frame(height: 1)
+            Text(text)
+                .font(.system(size: 17, weight: .regular, design: .serif))
+                .foregroundStyle(Color.signalInk.opacity(0.8))
+                .fixedSize()
+            Rectangle()
+                .fill(Color.signalLine.opacity(0.6))
+                .frame(height: 1)
+        }
+    }
 }
 
 private struct LibraryTallyCard: View {
     let stories: Int
     let days: Int
     let calmMornings: Int
+    var mixLine: String? = nil
 
     var body: some View {
         VStack(spacing: 6) {
@@ -73,6 +123,12 @@ private struct LibraryTallyCard: View {
             Text(RitualCopy.libraryTally(stories: stories, days: days))
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
+
+            if let mixLine {
+                Text(mixLine)
+                    .font(.caption)
+                    .foregroundStyle(Color.signalMuted.opacity(0.9))
+            }
 
             CalmMorningsBadge(count: calmMornings)
                 .padding(.top, 6)

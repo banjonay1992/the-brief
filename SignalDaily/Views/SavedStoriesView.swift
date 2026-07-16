@@ -48,7 +48,7 @@ private struct EmptySavedStoriesCard: View {
             Text("Nothing saved yet")
                 .font(.headline)
                 .multilineTextAlignment(.center)
-            Text("Save a story from its detail page when you want to come back later. The app will still keep the briefing finite.")
+            Text("Tap the bookmark on any story to keep it here. The briefing stays finite either way.")
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)

@@ -4,6 +4,7 @@ struct TodayBriefingView: View {
     @Environment(SavedStoriesStore.self) private var savedStoriesStore
     @Environment(SubscriptionStore.self) private var subscriptionStore
     @Environment(ReadingLedger.self) private var readingLedger
+    @Environment(PreferencesStore.self) private var preferencesStore
     @Bindable var viewModel: TodayViewModel
     var openSettings: () -> Void = {}
     @State private var activePopup: StoryPopup?
@@ -20,7 +21,7 @@ struct TodayBriefingView: View {
                 stateBanner
                 if let briefing = viewModel.briefing {
                     ReadingThread(
-                        total: briefing.allStories.count,
+                        total: viewModel.dayStories.count,
                         read: viewModel.readableStoryCount
                     )
                     .padding(.horizontal, 6)
@@ -61,12 +62,16 @@ struct TodayBriefingView: View {
         .sensoryFeedback(.impact(flexibility: .soft), trigger: viewModel.readableStoryCount)
         .sensoryFeedback(.success, trigger: readingLedger.calmMorningCount)
         .task {
+            viewModel.maxStories = preferencesStore.preferences.maxStories
             await viewModel.loadToday()
             await subscriptionStore.refresh()
             syncLedgerWithBriefing()
         }
         .onChange(of: viewModel.briefing) { _, _ in
             syncLedgerWithBriefing()
+        }
+        .onChange(of: preferencesStore.preferences.maxStories) { _, newLimit in
+            viewModel.maxStories = newLimit
         }
         .sheet(isPresented: $showsSubscriptionPrompt) {
             NavigationStack {
@@ -347,7 +352,7 @@ private struct SwipeCueView: View {
             HStack(spacing: 5) {
                 ForEach(0..<GlassDeckLayout.swipeCueDotCount, id: \.self) { index in
                     Capsule()
-                        .fill(index == activeDotIndex ? Color.signalSage.opacity(0.58) : Color.signalLine.opacity(0.72))
+                        .fill(index == activeDotIndex ? Color.signalPeach : Color.signalLine.opacity(0.72))
                         .frame(width: index == activeDotIndex ? 18 : 6, height: 6)
                 }
             }
@@ -584,6 +589,7 @@ private struct GlassTapButton: View {
 }
 
 private struct StoryInformationPopup: View {
+    @Environment(SavedStoriesStore.self) private var savedStoriesStore
     let story: StorySummary
     let detail: StoryDetail?
     let onClose: () -> Void
@@ -596,7 +602,14 @@ private struct StoryInformationPopup: View {
         StoryPopupChrome(onClose: onClose) {
             ScrollView {
                 VStack(alignment: .leading, spacing: PopupArticleLayout.sectionSpacing) {
-                    PopupHeader(title: BriefingStatusText.moreInformationAction, onClose: onClose)
+                    PopupHeader(
+                        title: BriefingStatusText.moreInformationAction,
+                        isSaved: savedStoriesStore.contains(story.id),
+                        onToggleSave: {
+                            savedStoriesStore.toggle(story)
+                        },
+                        onClose: onClose
+                    )
 
                     VStack(alignment: .leading, spacing: 12) {
                         Text(PopupCopy.cleaned(matchingDetail?.headline ?? story.headline))
@@ -732,7 +745,7 @@ private struct StoryPopupChrome<Content: View>: View {
                 .signalGlassCard(cornerRadius: 24)
                 .overlay(alignment: .topTrailing) {
                     Color.clear
-                        .frame(width: 76, height: 76)
+                        .frame(width: 56, height: 64)
                         .contentShape(Rectangle())
                         .onTapGesture(perform: onClose)
                 }
@@ -743,16 +756,36 @@ private struct StoryPopupChrome<Content: View>: View {
 
 private struct PopupHeader: View {
     let title: String
+    var isSaved: Bool? = nil
+    var onToggleSave: (() -> Void)? = nil
     let onClose: () -> Void
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 10) {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .tracking(1.4)
                 .foregroundStyle(Color.signalSage)
                 .textCase(.uppercase)
             Spacer()
+            if let isSaved, let onToggleSave {
+                Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(isSaved ? Color.signalPowderDeep : Color.signalInk)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        isSaved ? AnyShapeStyle(Color.signalPowder.opacity(0.45)) : AnyShapeStyle(.ultraThinMaterial),
+                        in: Circle()
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(isSaved ? Color.signalPowder : Color.signalInk.opacity(0.14), lineWidth: 1)
+                    )
+                    .contentShape(Circle())
+                    .onTapGesture(perform: onToggleSave)
+                    .animation(.easeInOut(duration: 0.18), value: isSaved)
+                    .accessibilityLabel(isSaved ? "Remove from saved" : "Save story")
+            }
             Image(systemName: "xmark")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Color.signalInk)

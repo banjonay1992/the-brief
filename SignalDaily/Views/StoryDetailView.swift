@@ -54,8 +54,10 @@ struct StoryDetailView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 14) {
-                SignalMetric(systemImage: "calendar", text: "17 May 2026")
-                SignalMetric(systemImage: "clock", text: "5 min read")
+                if let briefingDate = todayViewModel.briefing?.date {
+                    SignalMetric(systemImage: "calendar", text: BriefDate.display(briefingDate))
+                }
+                SignalMetric(systemImage: "checkmark.seal", text: story.sources.count == 1 ? "1 source" : "\(story.sources.count) sources")
                 Spacer()
                 MetadataPill(text: story.emotionalLoad.rawValue, tint: story.emotionalLoad == .heavy ? .signalClay : .signalSage)
             }

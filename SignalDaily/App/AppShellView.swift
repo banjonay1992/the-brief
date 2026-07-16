@@ -129,8 +129,6 @@ private struct DestinationView: View {
             BiasFramingExplanationView(storyID: storyID)
         case .subscription:
             SubscriptionView(subscriptionStore: subscriptionStore)
-        case .complete:
-            BriefingCompleteView(briefing: todayViewModel.briefing)
         }
     }
 }
