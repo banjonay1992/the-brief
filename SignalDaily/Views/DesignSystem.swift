@@ -9,6 +9,13 @@ extension Color {
     static let signalSage = Color(red: 0.392, green: 0.525, blue: 0.414)
     static let signalClay = Color(red: 0.711, green: 0.439, blue: 0.329)
     static let signalOchre = Color(red: 0.746, green: 0.496, blue: 0.108)
+
+    /// The only two pastels in the app, used semantically:
+    /// powder = settled and kept (progress, the seal, the library),
+    /// peach = alive and moving (continuing stories, the streak).
+    static let signalPowder = Color(red: 0.678, green: 0.792, blue: 0.882)
+    static let signalPowderDeep = Color(red: 0.404, green: 0.573, blue: 0.729)
+    static let signalPeach = Color(red: 0.984, green: 0.827, blue: 0.718)
 }
 
 struct ScreenBackground: ViewModifier {
@@ -42,13 +49,17 @@ extension View {
             )
     }
 
-    func signalGlassCard(cornerRadius: CGFloat = 18) -> some View {
+    func signalGlassCard(cornerRadius: CGFloat = 18, tint: Color? = nil) -> some View {
         background {
             ZStack {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(.ultraThinMaterial)
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(Color.signalSurface.opacity(0.52))
+                if let tint {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(tint.opacity(0.20))
+                }
                 LinearGradient(
                     colors: [
                         .white.opacity(0.36),
@@ -178,8 +189,8 @@ struct ReadingThread: View {
                 HStack(spacing: 4) {
                     ForEach(0..<total, id: \.self) { index in
                         Capsule()
-                            .fill(index < read ? Color.signalSage.opacity(0.85) : Color.signalLine.opacity(0.7))
-                            .frame(height: 3)
+                            .fill(index < read ? Color.signalPowderDeep.opacity(0.85) : Color.signalLine.opacity(0.7))
+                            .frame(height: 3.5)
                     }
                 }
                 Text("\(read) of \(total)")
@@ -195,6 +206,26 @@ struct ReadingThread: View {
     }
 }
 
+/// The streak, worn quietly: a peach capsule, never a fire emoji.
+struct CalmMorningsBadge: View {
+    let count: Int
+
+    var body: some View {
+        if count >= 2 {
+            Text(RitualCopy.calmMornings(count))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.signalClay)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(Color.signalPeach.opacity(0.55), in: Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color.signalPeach, lineWidth: 1)
+                )
+        }
+    }
+}
+
 /// The completion seal: a slow-drawn ring around a serif monogram.
 /// Deliberately unhurried — the reward is the sense of closure, not fireworks.
 struct SealBadge: View {
@@ -204,17 +235,17 @@ struct SealBadge: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Color.signalSage.opacity(0.10))
+                .fill(Color.signalPowder.opacity(0.35))
             Circle()
                 .trim(from: 0, to: isDrawn ? 1 : 0)
-                .stroke(Color.signalSage.opacity(0.75), style: StrokeStyle(lineWidth: 1.6, lineCap: .round))
+                .stroke(Color.signalPowderDeep.opacity(0.85), style: StrokeStyle(lineWidth: 1.6, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             Circle()
                 .inset(by: 5)
-                .stroke(Color.signalSage.opacity(0.35), lineWidth: 0.8)
+                .stroke(Color.signalPowderDeep.opacity(0.35), lineWidth: 0.8)
             Text("B")
                 .font(.system(size: size * 0.42, weight: .regular, design: .serif))
-                .foregroundStyle(Color.signalSage)
+                .foregroundStyle(Color.signalPowderDeep)
                 .opacity(isDrawn ? 1 : 0)
                 .scaleEffect(isDrawn ? 1 : 0.85)
         }

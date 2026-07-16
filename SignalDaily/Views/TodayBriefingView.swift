@@ -119,12 +119,8 @@ struct TodayBriefingView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)
-            if readingLedger.calmMorningCount >= 2 {
-                Text(RitualCopy.calmMornings(readingLedger.calmMorningCount))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.signalSage)
-                    .padding(.top, 2)
-            }
+            CalmMorningsBadge(count: readingLedger.calmMorningCount)
+                .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
     }
@@ -484,10 +480,14 @@ private struct StoryThreadMarker: View {
                 .font(.caption2.weight(.semibold))
                 .tracking(1.1)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.signalOchre)
+                .foregroundStyle(Color.signalClay)
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
-                .background(Color.signalOchre.opacity(0.12), in: Capsule())
+                .background(Color.signalPeach.opacity(0.55), in: Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color.signalPeach, lineWidth: 1)
+                )
 
             if let note = info.note {
                 Text(note)
@@ -532,15 +532,11 @@ private struct BriefingQueueCompleteCard: View {
                 .foregroundStyle(Color.signalMuted)
                 .monospacedDigit()
 
-            if summary.calmMornings >= 2 {
-                Text(RitualCopy.calmMornings(summary.calmMornings))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.signalSage)
-                    .padding(.top, 4)
-            }
+            CalmMorningsBadge(count: summary.calmMornings)
+                .padding(.top, 8)
 
             Rectangle()
-                .fill(Color.signalLine.opacity(0.55))
+                .fill(Color.signalPowderDeep.opacity(0.30))
                 .frame(width: 44, height: 1)
                 .padding(.vertical, 16)
 
@@ -552,7 +548,7 @@ private struct BriefingQueueCompleteCard: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 34)
         .padding(.horizontal, 28)
-        .signalGlassCard()
+        .signalGlassCard(tint: .signalPowder)
     }
 }
 

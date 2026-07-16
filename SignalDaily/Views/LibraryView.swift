@@ -66,7 +66,7 @@ private struct LibraryTallyCard: View {
         VStack(spacing: 6) {
             Text("\(stories)")
                 .font(.system(size: 44, weight: .regular, design: .serif))
-                .foregroundStyle(Color.signalInk)
+                .foregroundStyle(Color.signalPowderDeep)
                 .monospacedDigit()
                 .contentTransition(.numericText())
 
@@ -74,16 +74,12 @@ private struct LibraryTallyCard: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
 
-            if calmMornings >= 2 {
-                Text(RitualCopy.calmMornings(calmMornings))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.signalSage)
-                    .padding(.top, 2)
-            }
+            CalmMorningsBadge(count: calmMornings)
+                .padding(.top, 6)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 22)
-        .signalGlassCard()
+        .signalGlassCard(tint: .signalPowder)
         .accessibilityElement(children: .combine)
     }
 }
