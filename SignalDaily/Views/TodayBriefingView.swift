@@ -3,6 +3,7 @@ import SwiftUI
 struct TodayBriefingView: View {
     @Environment(SavedStoriesStore.self) private var savedStoriesStore
     @Environment(SubscriptionStore.self) private var subscriptionStore
+    @Environment(ReadingLedger.self) private var readingLedger
     @Bindable var viewModel: TodayViewModel
     var openSettings: () -> Void = {}
     @State private var activePopup: StoryPopup?
@@ -18,9 +19,17 @@ struct TodayBriefingView: View {
                 header
                 stateBanner
                 if let briefing = viewModel.briefing {
+                    ReadingThread(
+                        total: briefing.allStories.count,
+                        read: viewModel.readableStoryCount
+                    )
+                    .padding(.horizontal, 6)
+
                     StoryQueueCarousel(
                         stories: viewModel.storyQueue(savedStoryIDs: Set(savedStoriesStore.savedStoryIDs)),
                         readingTimeMinutes: briefing.readingTimeMinutes,
+                        threadInfo: threadInfo(for: briefing),
+                        completion: completionSummary(for: briefing),
                         onMoreInformation: { story in
                             activePopup = StoryPopup(kind: .information, story: story)
                             Task {
@@ -31,6 +40,8 @@ struct TodayBriefingView: View {
                             withAnimation(.easeInOut(duration: 0.24)) {
                                 viewModel.markRead(story.id)
                             }
+                            readingLedger.recordRead(story, briefingDate: briefing.date)
+                            recordCompletionIfSealed()
                             if viewModel.shouldPromptForSubscription(hasAccess: subscriptionStore.accessState.hasAccess) {
                                 showsSubscriptionPrompt = true
                             }
@@ -47,9 +58,15 @@ struct TodayBriefingView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
+        .sensoryFeedback(.impact(flexibility: .soft), trigger: viewModel.readableStoryCount)
+        .sensoryFeedback(.success, trigger: readingLedger.calmMorningCount)
         .task {
             await viewModel.loadToday()
             await subscriptionStore.refresh()
+            syncLedgerWithBriefing()
+        }
+        .onChange(of: viewModel.briefing) { _, _ in
+            syncLedgerWithBriefing()
         }
         .sheet(isPresented: $showsSubscriptionPrompt) {
             NavigationStack {
@@ -102,8 +119,50 @@ struct TodayBriefingView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)
+            if readingLedger.calmMorningCount >= 2 {
+                Text(RitualCopy.calmMornings(readingLedger.calmMorningCount))
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.signalSage)
+                    .padding(.top, 2)
+            }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private func syncLedgerWithBriefing() {
+        guard let briefing = viewModel.briefing else { return }
+        readingLedger.noteSeen(stories: briefing.allStories, briefingDate: briefing.date)
+        viewModel.hydrateReadStories(readingLedger.readStoryIDs(briefingDate: briefing.date))
+        recordCompletionIfSealed()
+    }
+
+    private func recordCompletionIfSealed() {
+        guard let briefing = viewModel.briefing else { return }
+        let queue = viewModel.storyQueue(savedStoryIDs: Set(savedStoriesStore.savedStoryIDs))
+        if queue.isEmpty && viewModel.readableStoryCount > 0 {
+            readingLedger.recordCompletedMorning(briefingDate: briefing.date)
+        }
+    }
+
+    private func threadInfo(for briefing: Briefing) -> [String: StoryThreadInfo] {
+        var result: [String: StoryThreadInfo] = [:]
+        for story in briefing.allStories {
+            let update = viewModel.updates?.updates.first { $0.storyId == story.id }
+            let day = readingLedger.threadDayNumber(storyID: story.id, briefingDate: briefing.date)
+                .flatMap { $0 >= 2 ? $0 : nil }
+            if update != nil || day != nil {
+                result[story.id] = StoryThreadInfo(dayNumber: day, note: update?.whatChanged)
+            }
+        }
+        return result
+    }
+
+    private func completionSummary(for briefing: Briefing) -> CompletionSummary {
+        CompletionSummary(
+            storyCount: viewModel.readableStoryCount,
+            minutes: briefing.readingTimeMinutes,
+            calmMornings: readingLedger.calmMorningCount
+        )
     }
 
     @ViewBuilder
@@ -152,9 +211,22 @@ private extension TodayBriefingView {
 
 }
 
+struct StoryThreadInfo: Equatable {
+    let dayNumber: Int?
+    let note: String?
+}
+
+struct CompletionSummary: Equatable {
+    let storyCount: Int
+    let minutes: Int
+    let calmMornings: Int
+}
+
 private struct StoryQueueCarousel: View {
     let stories: [StorySummary]
     let readingTimeMinutes: Int
+    let threadInfo: [String: StoryThreadInfo]
+    let completion: CompletionSummary
     let onMoreInformation: (StorySummary) -> Void
     let onDone: (StorySummary) -> Void
     let onComment: (StorySummary) -> Void
@@ -184,7 +256,7 @@ private struct StoryQueueCarousel: View {
             }
 
             if stories.isEmpty {
-                BriefingQueueCompleteCard()
+                BriefingQueueCompleteCard(summary: completion)
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
             } else {
                 GeometryReader { proxy in
@@ -197,6 +269,7 @@ private struct StoryQueueCarousel: View {
                                         story: story,
                                         index: index + 1,
                                         total: stories.count,
+                                        threadInfo: threadInfo[story.id],
                                         onMoreInformation: {
                                             onMoreInformation(story)
                                         },
@@ -297,6 +370,7 @@ private struct LeadStoryGlassCard: View {
     let story: StorySummary
     let index: Int
     let total: Int
+    var threadInfo: StoryThreadInfo? = nil
     let onMoreInformation: () -> Void
     let onDone: () -> Void
     let onComment: () -> Void
@@ -309,6 +383,10 @@ private struct LeadStoryGlassCard: View {
                         .font(.caption2.weight(.semibold))
                         .tracking(1.4)
                         .foregroundStyle(Color.signalMuted.opacity(0.78))
+                }
+
+                if let threadInfo {
+                    StoryThreadMarker(info: threadInfo)
                 }
 
                 Text(story.headline)
@@ -397,28 +475,82 @@ private struct LeadStoryGlassCard: View {
     }
 }
 
-private struct BriefingQueueCompleteCard: View {
-    var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "checkmark")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(Color.signalSage)
-                .frame(width: 46, height: 46)
-                .background(.ultraThinMaterial, in: Circle())
-                .overlay(Circle().stroke(Color.signalInk.opacity(0.12), lineWidth: 1))
+private struct StoryThreadMarker: View {
+    let info: StoryThreadInfo
 
-            Text("You’re caught up.")
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(markerLabel)
+                .font(.caption2.weight(.semibold))
+                .tracking(1.1)
+                .textCase(.uppercase)
+                .foregroundStyle(Color.signalOchre)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
+                .background(Color.signalOchre.opacity(0.12), in: Capsule())
+
+            if let note = info.note {
+                Text(note)
+                    .font(.caption)
+                    .foregroundStyle(Color.signalMuted)
+                    .lineLimit(1)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var markerLabel: String {
+        if let day = info.dayNumber {
+            return RitualCopy.threadMarker(day: day)
+        }
+        return "Continuing"
+    }
+}
+
+private struct BriefingQueueCompleteCard: View {
+    let summary: CompletionSummary
+
+    var body: some View {
+        VStack(spacing: 0) {
+            SealBadge()
+                .padding(.bottom, 18)
+
+            Text(RitualCopy.sealedTitle)
                 .font(.system(size: 30, weight: .regular, design: .serif))
                 .foregroundStyle(Color.signalInk)
                 .multilineTextAlignment(.center)
+                .padding(.bottom, 6)
 
-            Text("No more cards need your attention right now.")
+            Text(RitualCopy.sealedSubtitle)
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)
+                .padding(.bottom, 16)
+
+            Text(RitualCopy.sealedTally(storyCount: summary.storyCount, minutes: summary.minutes))
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Color.signalMuted)
+                .monospacedDigit()
+
+            if summary.calmMornings >= 2 {
+                Text(RitualCopy.calmMornings(summary.calmMornings))
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.signalSage)
+                    .padding(.top, 4)
+            }
+
+            Rectangle()
+                .fill(Color.signalLine.opacity(0.55))
+                .frame(width: 44, height: 1)
+                .padding(.vertical, 16)
+
+            Text(RitualCopy.nextBriefLine)
+                .font(.footnote)
+                .foregroundStyle(Color.signalMuted.opacity(0.9))
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 260)
+        .padding(.vertical, 34)
         .padding(.horizontal, 28)
         .signalGlassCard()
     }

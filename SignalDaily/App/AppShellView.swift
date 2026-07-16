@@ -7,6 +7,7 @@ struct AppShellView: View {
     @State private var subscriptionStore: SubscriptionStore
     @State private var authStore: AuthStore
     @State private var savedStoriesStore = SavedStoriesStore()
+    @State private var readingLedger = ReadingLedger()
     @State private var selectedTab: AppTab = .today
     @State private var todayPath: [AppRoute] = []
     @State private var donePath: [AppRoute] = []
@@ -32,7 +33,7 @@ struct AppShellView: View {
             .tag(AppTab.today)
 
             navigationStack(path: $donePath) {
-                DoneStoriesView()
+                LibraryView()
             }
             .tabItem { Label(AppTab.done.title, systemImage: AppTab.done.systemImage) }
             .tag(AppTab.done)
@@ -55,6 +56,7 @@ struct AppShellView: View {
         .environment(subscriptionStore)
         .environment(authStore)
         .environment(savedStoriesStore)
+        .environment(readingLedger)
         .fullScreenCover(isPresented: Binding(
             get: { !authStore.isSignedIn || !hasCompletedOnboarding },
             set: { _ in }
@@ -73,6 +75,7 @@ struct AppShellView: View {
                 .environment(subscriptionStore)
                 .environment(authStore)
                 .environment(savedStoriesStore)
+                .environment(readingLedger)
                 .interactiveDismissDisabled(true)
             } else {
                 AuthView(authStore: authStore)

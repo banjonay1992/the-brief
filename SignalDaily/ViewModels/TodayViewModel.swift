@@ -114,6 +114,10 @@ final class TodayViewModel {
         readStoryIDs.insert(storyID)
     }
 
+    func hydrateReadStories(_ ids: Set<String>) {
+        readStoryIDs.formUnion(ids)
+    }
+
     func useDepthToken() async {
         guard depthTokenStatus.canUseToken else { return }
         do {

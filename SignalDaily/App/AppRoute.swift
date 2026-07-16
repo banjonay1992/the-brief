@@ -24,7 +24,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .today: "Today"
-        case .done: "Done"
+        case .done: "Library"
         case .saved: "Saved"
         case .settings: "Settings"
         }
@@ -33,7 +33,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .today: "newspaper"
-        case .done: "checkmark.circle"
+        case .done: "books.vertical"
         case .saved: "bookmark"
         case .settings: "gearshape"
         }

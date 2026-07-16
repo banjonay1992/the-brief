@@ -65,10 +65,10 @@ final class CalmTextTimingTests: XCTestCase {
         XCTAssertEqual(SignalTopBarLayout.controlSize, 36)
     }
 
-    func testDoneTabIsAvailableForClearedStories() {
+    func testLibraryTabIsAvailableForClearedStories() {
         XCTAssertTrue(AppTab.allCases.contains(.done))
-        XCTAssertEqual(AppTab.done.title, "Done")
-        XCTAssertEqual(AppTab.done.systemImage, "checkmark.circle")
+        XCTAssertEqual(AppTab.done.title, "Library")
+        XCTAssertEqual(AppTab.done.systemImage, "books.vertical")
     }
 
     func testMonthlySubscriptionUsesNinetyNinePenceFallbackCopy() {

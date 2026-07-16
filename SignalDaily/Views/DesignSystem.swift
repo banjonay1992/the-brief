@@ -141,6 +141,93 @@ enum SavedStoriesLayout {
     static let emptyStateTopPadding: CGFloat = 76
 }
 
+enum RitualCopy {
+    static let sealedTitle = "Today is sealed."
+    static let sealedSubtitle = "Nothing more is asked of you."
+    static let nextBriefLine = "The next brief arrives tomorrow morning."
+
+    static func calmMornings(_ count: Int) -> String {
+        count == 1 ? "1 calm morning" : "\(count) calm mornings"
+    }
+
+    static func sealedTally(storyCount: Int, minutes: Int) -> String {
+        let stories = storyCount == 1 ? "1 story" : "\(storyCount) stories"
+        return "\(stories) · about \(max(minutes, 1)) min"
+    }
+
+    static func threadMarker(day: Int) -> String {
+        "Day \(day)"
+    }
+
+    static func libraryTally(stories: Int, days: Int) -> String {
+        let storyText = stories == 1 ? "1 story" : "\(stories) stories"
+        let dayText = days == 1 ? "1 day" : "\(days) days"
+        return "\(storyText) across \(dayText)"
+    }
+}
+
+/// A quiet reading-progress line: one slender segment per story,
+/// filling as cards are marked done. No numbers shouting, no rings.
+struct ReadingThread: View {
+    let total: Int
+    let read: Int
+
+    var body: some View {
+        if total > 0 {
+            HStack(spacing: 10) {
+                HStack(spacing: 4) {
+                    ForEach(0..<total, id: \.self) { index in
+                        Capsule()
+                            .fill(index < read ? Color.signalSage.opacity(0.85) : Color.signalLine.opacity(0.7))
+                            .frame(height: 3)
+                    }
+                }
+                Text("\(read) of \(total)")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Color.signalMuted.opacity(0.85))
+                    .monospacedDigit()
+                    .fixedSize()
+            }
+            .animation(.easeInOut(duration: 0.35), value: read)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(read) of \(total) stories read")
+        }
+    }
+}
+
+/// The completion seal: a slow-drawn ring around a serif monogram.
+/// Deliberately unhurried — the reward is the sense of closure, not fireworks.
+struct SealBadge: View {
+    var size: CGFloat = 74
+    @State private var isDrawn = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.signalSage.opacity(0.10))
+            Circle()
+                .trim(from: 0, to: isDrawn ? 1 : 0)
+                .stroke(Color.signalSage.opacity(0.75), style: StrokeStyle(lineWidth: 1.6, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            Circle()
+                .inset(by: 5)
+                .stroke(Color.signalSage.opacity(0.35), lineWidth: 0.8)
+            Text("B")
+                .font(.system(size: size * 0.42, weight: .regular, design: .serif))
+                .foregroundStyle(Color.signalSage)
+                .opacity(isDrawn ? 1 : 0)
+                .scaleEffect(isDrawn ? 1 : 0.85)
+        }
+        .frame(width: size, height: size)
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.1)) {
+                isDrawn = true
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 enum BriefingStatusText {
     static let moreInformationAction = "More information"
     static let doneAction = "Done"
