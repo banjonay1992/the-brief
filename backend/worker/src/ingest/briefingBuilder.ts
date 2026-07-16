@@ -406,20 +406,34 @@ function sourceRecordsForCluster(cluster: StoryCluster): SourceRecord[] {
     .slice(0, 8);
 }
 
+// The summary renders directly beneath the headline in the app, so it must
+// never quote the headline back. It carries what the headline cannot:
+// who is reporting, how much corroboration exists, and where it points.
 function summaryForCluster(cluster: StoryCluster): string {
-  const sourceCount = sourceRecordsForCluster(cluster).length;
+  const sources = sourceRecordsForCluster(cluster);
+  const sourceCount = sources.length;
   const countries = countriesForCluster(cluster);
-  const countryContext = countries.length > 0 ? ` The event context points to ${countries.slice(0, 2).join(" and ")}.` : "";
-  const sourceText = sourceCount === 1 ? "One source" : `${sourceCount} sources`;
+  const countryContext = countries.length > 0 ? ` Coverage points to ${countries.slice(0, 2).join(" and ")}.` : "";
+  const leadName = sources[0]?.name ?? "one detected source";
   const excerpt = bestExcerptForCluster(cluster);
   if (excerpt) {
-    const reportVerb = sourceCount === 1 ? "reports" : "report";
-    return `${sourceText} ${reportVerb}: ${excerpt}${countryContext} Details remain attributed to the current source set.`;
+    const attribution = sourceCount > 1 ? `Via ${leadName} and ${sourceCount - 1} more` : `Via ${leadName}`;
+    return `${attribution}: ${excerpt}${countryContext}`;
   }
-  if (sourceCount > 1) {
-    return `${sourceText} report: “${cluster.primary.title}.”${countryContext} The briefing keeps details attributed while checking what is independently supported.`;
+  if (sourceCount >= 3) {
+    return `${leadName} and ${sourceCount - 1} other outlets are on this story.${countryContext} Where their accounts overlap it is treated as corroborated; lone figures stay attributed.`;
   }
-  return `${sourceText} reports: “${cluster.primary.title}.”${countryContext} Treat this as an early signal until more sources or primary evidence confirm the details.`;
+  if (sourceCount === 2) {
+    return `${leadName} and ${sources[1]?.name ?? "one other outlet"} are both reporting it.${countryContext} Early corroboration, with specifics still attributed to each source.`;
+  }
+  const sourceType = sourceTypeForDomain(cluster.primary.domain);
+  const typePhrase =
+    sourceType === "wire"
+      ? ", a wire service that syndicates widely"
+      : sourceType === "primary"
+        ? ", a primary source close to the event"
+        : "";
+  return `So far this comes only from ${leadName}${typePhrase}.${countryContext} An early signal — it firms up if more sources or primary evidence arrive.`;
 }
 
 function whatHappenedForCluster(cluster: StoryCluster, sources: SourceRecord[]): string {
@@ -614,7 +628,7 @@ function whyItMattersForArticle(article: RawDiscoveredArticle, region: string): 
     case "Humanitarian":
       return `Humanitarian developments in ${place} can affect aid access, civilian protection, displacement planning, and how quickly outside support reaches people.`;
     default:
-      return `This may change today's wider context in ${place}; the briefing keeps it in view without treating every early claim as settled.`;
+      return `A developing thread in ${place}. If corroboration arrives it graduates into the main picture; if it fades, it quietly leaves the brief.`;
   }
 }
 
