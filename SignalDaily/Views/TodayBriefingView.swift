@@ -12,7 +12,7 @@ struct TodayBriefingView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 14) {
                 SignalTopBar(title: "The Brief", trailingSystemImage: "gearshape") {
                     openSettings()
                 }
@@ -53,7 +53,9 @@ struct TodayBriefingView: View {
                     )
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .padding(.bottom, 16)
         }
         .signalAtmosphere()
         .navigationTitle("")
@@ -110,23 +112,23 @@ struct TodayBriefingView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .center, spacing: 10) {
+        VStack(alignment: .center, spacing: 6) {
             Text(headerDateText)
                 .font(.caption.weight(.semibold))
-                .tracking(2.6)
+                .tracking(2.4)
                 .textCase(.uppercase)
                 .foregroundStyle(Color.signalMuted)
             CascadingText(
                 text: "Today’s Briefing",
-                font: .system(size: 40, weight: .regular, design: .serif),
+                font: .system(size: 29, weight: .regular, design: .serif),
                 color: .signalInk
             )
             Text(DayPhase.current().tagline)
-                .font(.subheadline)
+                .font(.footnote)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)
             CalmMorningsBadge(count: readingLedger.calmMorningCount)
-                .padding(.top, 4)
+                .padding(.top, 3)
         }
         .frame(maxWidth: .infinity)
     }
@@ -300,7 +302,7 @@ private struct StoryQueueCarousel: View {
                     .contentMargins(.horizontal, max((proxy.size.width - cardWidth) / 2, 0), for: .scrollContent)
                     .scrollIndicators(.hidden)
                 }
-                .frame(height: 458)
+                .frame(height: 434)
 
                 if GlassDeckLayout.showsSwipeCue {
                     SwipeCueView(
@@ -404,11 +406,12 @@ private struct LeadStoryGlassCard: View {
                 }
 
                 Text(story.headline)
-                    .font(.system(size: 29, weight: .regular, design: .serif))
+                    .font(.system(size: 28, weight: .regular, design: .serif))
                     .foregroundStyle(Color.signalInk)
                     .lineSpacing(1)
                     .lineLimit(4)
                     .minimumScaleFactor(0.78)
+                    .layoutPriority(1)
 
                 Text(story.summary)
                     .font(.system(size: 15))
@@ -463,8 +466,8 @@ private struct LeadStoryGlassCard: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 22)
-        .frame(maxWidth: .infinity, minHeight: 448, maxHeight: 448, alignment: .leading)
+        .padding(.vertical, 18)
+        .frame(maxWidth: .infinity, minHeight: 424, maxHeight: 424, alignment: .leading)
         .signalGlassCard(tint: accent)
         .overlay {
             Color.clear

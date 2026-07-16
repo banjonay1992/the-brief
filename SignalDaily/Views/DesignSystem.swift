@@ -263,7 +263,7 @@ enum GlassDeckLayout {
     static let inactiveScale = 0.96
     static let inactiveOpacity = 0.68
     static let inactiveBlur = 0.5
-    static let topOffset: CGFloat = 18
+    static let topOffset: CGFloat = 6
     static let showsSwipeCue = true
     static let swipeCueDotCount = 3
     static let showsQueueLabel = false
