@@ -1,0 +1,94 @@
+{
+  "id": "story_001",
+  "headline": "Ceasefire talks resume after overnight strikes",
+  "category": "Conflict",
+  "region": "Middle East",
+  "whatHappened": "Airstrikes were reported near the border overnight. The government carrying out the strikes said it targeted armed infrastructure. Local officials reported civilian damage. Independent verification of the exact targets remains limited.",
+  "whyItMatters": "The exchange could weaken ceasefire negotiations and increase the risk of broader regional escalation.",
+  "whatWeKnow": [
+    "Strike locations were reported by multiple outlets.",
+    "Talks resumed later in the day.",
+    "Both sides issued conflicting statements."
+  ],
+  "whatIsUnclear": [
+    "Casualty figures remain disputed.",
+    "Responsibility claims have not been independently verified.",
+    "The intended targets have not been confirmed by independent investigators."
+  ],
+  "framingCheck": {
+    "westernMainstream": "Often frames the strikes through regional security concerns.",
+    "localRegional": "Often frames the strikes as a sovereignty or ceasefire violation.",
+    "officialGovernment": "The government carrying out the strikes described them as defensive.",
+    "affectedPopulation": "Residents and local officials focused on civilian harm and disruption.",
+    "independentEvidence": "Available evidence confirms strikes occurred, but does not fully verify the intended targets.",
+    "humanRightsNGO": "Rights groups focus on proportionality, civilian risk, and access for investigators.",
+    "opposingSide": "The targeted side described the strikes as a ceasefire breach."
+  },
+  "confidence": {
+    "rating": "Medium-high",
+    "reason": "The event is confirmed by multiple sources, but target details and casualty figures remain disputed."
+  },
+  "emotionalLoad": "Heavy",
+  "sources": [
+    {
+      "id": "source_001",
+      "name": "Reuters",
+      "type": "wire",
+      "region": "International",
+      "url": "https://example.com/reuters",
+      "publishedAt": "2026-05-17T09:00:00Z",
+      "framing": "International wire framing"
+    }
+  ],
+  "biasAudit": {
+    "passed": true,
+    "notes": [
+      "Claims are attributed.",
+      "No government framing is presented as neutral fact.",
+      "Affected-population perspective included.",
+      "Uncertainty stated clearly."
+    ]
+  },
+  "depthAnalysis": {
+    "timeline": [
+      "Overnight reports described strikes near the border.",
+      "Officials from both sides issued competing statements.",
+      "Negotiators resumed talks later in the day."
+    ],
+    "keyActors": [
+      "Government forces",
+      "Armed group",
+      "Local officials",
+      "Civilian residents",
+      "Mediators"
+    ],
+    "backgroundContext": "The area has seen repeated ceasefire strain. Similar incidents are often described differently by official, regional, and affected-population sources.",
+    "sourceComparison": "Wire reports confirm the event occurred. Local sources add civilian-impact details. Official statements disagree on targets and responsibility.",
+    "possibleOutcomes": [
+      "Talks continue with tighter monitoring.",
+      "Further strikes weaken trust in the ceasefire.",
+      "Independent investigators clarify casualty and target claims."
+    ],
+    "evidenceConfidence": {
+      "rating": "Medium",
+      "reason": "Several sources confirm the incident, but key claims remain contested."
+    },
+    "furtherReading": [
+      {
+        "id": "source_001",
+        "name": "Reuters",
+        "type": "wire",
+        "region": "International",
+        "url": "https://example.com/reuters",
+        "publishedAt": "2026-05-17T09:00:00Z",
+        "framing": "International wire framing"
+      }
+    ]
+  },
+  "evidenceCheck": {
+    "claim": "A foreign intelligence agency secretly directed the attack.",
+    "classification": "Speculative",
+    "why": "No primary documents or independently verified evidence currently support this. The claim is circulating mostly through commentary accounts and has not been confirmed by reliable reporting."
+  }
+}
+

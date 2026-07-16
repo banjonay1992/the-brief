@@ -1,0 +1,76 @@
+name: SignalDaily
+options:
+  minimumXcodeGenVersion: 2.40.0
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "13"
+    DEVELOPMENT_TEAM: UKMBQT8869
+    CODE_SIGN_STYLE: Automatic
+targets:
+  SignalDaily:
+    type: application
+    platform: iOS
+    sources:
+      - path: SignalDaily
+    resources:
+      - path: SignalDaily/Resources
+    entitlements:
+      path: SignalDaily/SignalDaily.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
+    info:
+      path: SignalDaily/Info.plist
+      properties:
+        CFBundleDisplayName: The Brief
+        CFBundleIdentifier: com.signaldaily.app
+        CFBundleURLTypes:
+          - CFBundleURLName: com.signaldaily.app.apple-auth
+            CFBundleURLSchemes:
+              - thebrief
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        SignalDailyAPIBaseURL: "$(SIGNAL_DAILY_API_BASE_URL)"
+        SignalDailyUseMocks: "$(SIGNAL_DAILY_USE_MOCKS)"
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UILaunchScreen:
+          UIColorName: BackgroundColor
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.signaldaily.app
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_USER_SCRIPT_SANDBOXING: "YES"
+        GENERATE_INFOPLIST_FILE: "NO"
+        SIGNAL_DAILY_API_BASE_URL: "https://signal-daily-api.nathancoleasi.workers.dev"
+        SIGNAL_DAILY_USE_MOCKS: "NO"
+      configs:
+        Release:
+          CODE_SIGN_IDENTITY: "iPhone Distribution"
+          CODE_SIGN_STYLE: Manual
+          PROVISIONING_PROFILE_SPECIFIER: "The Brief App Store 2"
+  SignalDailyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: SignalDailyTests
+    dependencies:
+      - target: SignalDaily
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.signaldaily.tests
+        GENERATE_INFOPLIST_FILE: "YES"

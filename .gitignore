@@ -1,0 +1,14 @@
+.DS_Store
+DerivedData/
+build/
+node_modules/
+.wrangler/
+*.xcuserdata/
+*.xcuserstate
+*.moved-aside
+*.ipa
+*.dSYM.zip
+*.dSYM
+.swiftpm/
+Package.resolved
+tmp-*/

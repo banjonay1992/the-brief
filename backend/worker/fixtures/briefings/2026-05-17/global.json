@@ -1,0 +1,28 @@
+{
+  "date": "2026-05-17",
+  "title": "Today’s Global Briefing",
+  "readingTimeMinutes": 9,
+  "emotionalLoad": "Medium",
+  "storyCount": 18,
+  "sections": [
+    {
+      "id": "middle-east",
+      "title": "Middle East",
+      "stories": [
+        {
+          "id": "story_001",
+          "headline": "Ceasefire talks resume after overnight strikes",
+          "region": "Middle East",
+          "category": "Conflict",
+          "summary": "Negotiators resumed talks after renewed strikes near the border.",
+          "whyItMatters": "The exchange could weaken the current ceasefire framework.",
+          "confidence": "Medium-high",
+          "emotionalLoad": "Heavy",
+          "sourceCount": 5,
+          "imageId": "image_001"
+        }
+      ]
+    }
+  ]
+}
+

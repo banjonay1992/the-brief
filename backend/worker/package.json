@@ -1,0 +1,23 @@
+{
+  "name": "signal-daily-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "deploy": "wrangler deploy",
+    "editorial:queue": "node scripts/fetch-codex-editorial-queue.mjs",
+    "editorial:validate": "node scripts/validate-codex-editorial-payload.mjs",
+    "editorial:apply": "node scripts/apply-codex-editorial-patches.mjs",
+    "editorial:codex": "node scripts/run-codex-editorial-pass.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "types": "wrangler types"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.13",
+    "wrangler": "^4.50.0"
+  }
+}

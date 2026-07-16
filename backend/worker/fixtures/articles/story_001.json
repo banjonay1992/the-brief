@@ -1,0 +1,59 @@
+{
+  "id": "story_001",
+  "headline": "Ceasefire talks resume after overnight strikes",
+  "category": "Conflict",
+  "region": "Middle East",
+  "whatHappened": "Airstrikes were reported near the border overnight. The government carrying out the strikes said it targeted armed infrastructure. Local officials reported civilian damage. Independent verification of the exact targets remains limited.",
+  "whyItMatters": "The exchange could weaken ceasefire negotiations and increase the risk of broader regional escalation.",
+  "whatWeKnow": [
+    "Strike locations were reported by multiple outlets.",
+    "Talks resumed later in the day.",
+    "Both sides issued conflicting statements."
+  ],
+  "whatIsUnclear": [
+    "Casualty figures remain disputed.",
+    "Responsibility claims have not been independently verified.",
+    "The intended targets have not been confirmed by independent investigators."
+  ],
+  "framingCheck": {
+    "westernMainstream": "Often frames the strikes through regional security concerns.",
+    "localRegional": "Often frames the strikes as a sovereignty or ceasefire violation.",
+    "officialGovernment": "The government carrying out the strikes described them as defensive.",
+    "affectedPopulation": "Residents and local officials focused on civilian harm and disruption.",
+    "independentEvidence": "Available evidence confirms strikes occurred, but does not fully verify the intended targets.",
+    "humanRightsNGO": "Rights groups focus on proportionality, civilian risk, and access for investigators.",
+    "opposingSide": "The targeted side described the strikes as a ceasefire breach."
+  },
+  "confidence": {
+    "rating": "Medium-high",
+    "reason": "The event is confirmed by multiple sources, but target details and casualty figures remain disputed."
+  },
+  "emotionalLoad": "Heavy",
+  "sources": [
+    {
+      "id": "source_001",
+      "name": "Reuters",
+      "type": "wire",
+      "region": "International",
+      "url": "https://example.com/reuters",
+      "publishedAt": "2026-05-17T09:00:00Z",
+      "framing": "International wire framing"
+    }
+  ],
+  "biasAudit": {
+    "passed": true,
+    "notes": [
+      "Claims are attributed.",
+      "No government framing is presented as neutral fact.",
+      "Affected-population perspective included.",
+      "Uncertainty stated clearly."
+    ]
+  },
+  "depthAnalysis": null,
+  "evidenceCheck": {
+    "claim": "A foreign intelligence agency secretly directed the attack.",
+    "classification": "Speculative",
+    "why": "No primary documents or independently verified evidence currently support this."
+  }
+}
+

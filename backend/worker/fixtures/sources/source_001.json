@@ -1,0 +1,10 @@
+{
+  "id": "source_001",
+  "name": "Reuters",
+  "type": "wire",
+  "region": "International",
+  "url": "https://example.com/reuters",
+  "publishedAt": "2026-05-17T09:00:00Z",
+  "framing": "International wire framing"
+}
+

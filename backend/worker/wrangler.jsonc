@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "signal-daily-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "SIGNAL_ENV": "development",
+    "OPENAI_MODEL": "gpt-5.4-nano",
+    "MAX_DAILY_STORIES": "120",
+    "MIN_HOURLY_NEW_STORIES": "5",
+    "OPENAI_SYNTHESIS_ENABLED": "NO",
+    "OPENAI_SYNTHESIS_STORY_LIMIT": "120",
+    "OPENAI_SYNTHESIS_BATCH_SIZE": "4",
+    "APPLE_NATIVE_CLIENT_ID": "com.signaldaily.app",
+    "APPLE_WEB_CLIENT_ID": "com.signaldaily.web",
+    "APPLE_WEB_REDIRECT_URI": "https://signal-daily-api.nathancoleasi.workers.dev/api/auth/apple/web/callback"
+  },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "r2_buckets": [
+    {
+      "binding": "SIGNAL_DAILY_R2",
+      "bucket_name": "signal-daily-briefings",
+      "preview_bucket_name": "signal-daily-briefings-preview"
+    }
+  ]
+}
