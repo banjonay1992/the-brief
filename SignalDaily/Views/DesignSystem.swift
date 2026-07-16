@@ -25,9 +25,137 @@ struct ScreenBackground: ViewModifier {
     }
 }
 
+/// The sky the app lives under. Five gentle phases across the day —
+/// the ritual should look like the hour it happens in.
+enum DayPhase: CaseIterable {
+    case dawn, morning, afternoon, evening, night
+
+    static func current(hour: Int = Calendar.current.component(.hour, from: .now)) -> DayPhase {
+        switch hour {
+        case 5..<8: .dawn
+        case 8..<12: .morning
+        case 12..<17: .afternoon
+        case 17..<21: .evening
+        default: .night
+        }
+    }
+
+    var gradient: [Color] {
+        switch self {
+        case .dawn: [
+            Color(red: 0.973, green: 0.898, blue: 0.847),
+            Color(red: 0.976, green: 0.945, blue: 0.895),
+            Color.signalBackground
+        ]
+        case .morning: [
+            Color(red: 0.879, green: 0.925, blue: 0.937),
+            Color(red: 0.945, green: 0.949, blue: 0.918),
+            Color.signalBackground
+        ]
+        case .afternoon: [
+            Color(red: 0.965, green: 0.937, blue: 0.847),
+            Color(red: 0.973, green: 0.957, blue: 0.906),
+            Color.signalBackground
+        ]
+        case .evening: [
+            Color(red: 0.933, green: 0.867, blue: 0.833),
+            Color(red: 0.914, green: 0.894, blue: 0.914),
+            Color.signalBackground
+        ]
+        case .night: [
+            Color(red: 0.827, green: 0.867, blue: 0.914),
+            Color(red: 0.914, green: 0.914, blue: 0.898),
+            Color.signalBackground
+        ]
+        }
+    }
+
+    var orb: Color {
+        switch self {
+        case .dawn: Color(red: 0.976, green: 0.749, blue: 0.596)
+        case .morning: Color(red: 0.667, green: 0.808, blue: 0.871)
+        case .afternoon: Color(red: 0.949, green: 0.827, blue: 0.545)
+        case .evening: Color(red: 0.925, green: 0.694, blue: 0.573)
+        case .night: Color(red: 0.769, green: 0.816, blue: 0.894)
+        }
+    }
+
+    var secondaryOrb: Color {
+        switch self {
+        case .dawn: Color.signalPowder
+        case .morning: Color(red: 0.918, green: 0.882, blue: 0.769)
+        case .afternoon: Color.signalPeach
+        case .evening: Color(red: 0.780, green: 0.741, blue: 0.831)
+        case .night: Color(red: 0.851, green: 0.831, blue: 0.769)
+        }
+    }
+
+    var tagline: String {
+        switch self {
+        case .dawn: "The early edition. The world can wait for coffee."
+        case .morning: "One calm global pass. Evidence first, no infinite feed."
+        case .afternoon: "The afternoon edition. Still no infinite feed."
+        case .evening: "The evening edition. Read it, seal it, rest."
+        case .night: "The late edition. Tomorrow is already on its way."
+        }
+    }
+}
+
+/// Soft sky gradient with two blurred light orbs. Sits behind glass
+/// so every card picks up a little of the hour's colour.
+struct AtmosphereBackground: View {
+    var phase: DayPhase = .current()
+    var intensity: Double = 1.0
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: phase.gradient, startPoint: .top, endPoint: .bottom)
+            Circle()
+                .fill(phase.orb.opacity(0.50 * intensity))
+                .frame(width: 300, height: 300)
+                .blur(radius: 80)
+                .offset(x: 120, y: -300)
+            Circle()
+                .fill(phase.secondaryOrb.opacity(0.38 * intensity))
+                .frame(width: 360, height: 360)
+                .blur(radius: 95)
+                .offset(x: -150, y: 220)
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+/// Every category gets a quiet accent so the deck shifts colour as it turns.
+enum CategoryStyle {
+    static func tint(for category: String) -> Color {
+        let key = category.lowercased()
+        if key.contains("conflict") || key.contains("security") || key.contains("politic") || key.contains("justice") {
+            return .signalClay
+        }
+        if key.contains("climate") || key.contains("environment") || key.contains("energy") || key.contains("weather") {
+            return .signalSage
+        }
+        if key.contains("science") || key.contains("tech") || key.contains("health") || key.contains("space") {
+            return .signalPowderDeep
+        }
+        if key.contains("econom") || key.contains("business") || key.contains("market") || key.contains("finance") || key.contains("trade") {
+            return .signalOchre
+        }
+        let palette: [Color] = [.signalSage, .signalOchre, .signalPowderDeep, .signalClay]
+        let seed = category.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+        return palette[seed % palette.count]
+    }
+}
+
 extension View {
     func signalScreen() -> some View {
         modifier(ScreenBackground())
+    }
+
+    /// Browsing surfaces live under the sky; reading surfaces stay cream.
+    func signalAtmosphere(intensity: Double = 1.0) -> some View {
+        background(AtmosphereBackground(intensity: intensity))
     }
 
     func signalCard() -> some View {

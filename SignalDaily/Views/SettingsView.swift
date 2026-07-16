@@ -115,7 +115,7 @@ struct SettingsView: View {
             .padding(20)
             .padding(.bottom, 24)
         }
-        .signalScreen()
+        .signalAtmosphere(intensity: 0.45)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)

@@ -34,7 +34,7 @@ struct SavedStoriesView: View {
             .padding(20)
             .padding(.top, savedStoriesStore.savedStoryIDs.isEmpty ? SavedStoriesLayout.emptyStateTopPadding : 0)
         }
-        .signalScreen()
+        .signalAtmosphere(intensity: 0.55)
         .navigationTitle("Saved")
         .toolbarBackground(Color.signalBackground, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

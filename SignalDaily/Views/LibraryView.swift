@@ -54,7 +54,7 @@ struct LibraryView: View {
             .padding(20)
             .padding(.top, readingLedger.totalReadCount == 0 ? SavedStoriesLayout.emptyStateTopPadding : 34)
         }
-        .signalScreen()
+        .signalAtmosphere(intensity: 0.55)
         .navigationTitle("Library")
         .toolbarBackground(Color.signalBackground, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -182,12 +182,13 @@ private struct LibraryStoryRow: View {
     }
 
     private var rowContent: some View {
-        HStack(alignment: .top, spacing: 12) {
+        let accent = CategoryStyle.tint(for: record.story.category)
+        return HStack(alignment: .top, spacing: 12) {
             Image(systemName: "checkmark")
                 .font(.caption.weight(.bold))
-                .foregroundStyle(Color.signalSage)
+                .foregroundStyle(accent)
                 .frame(width: 26, height: 26)
-                .background(Color.signalSage.opacity(0.12), in: Circle())
+                .background(accent.opacity(0.12), in: Circle())
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(record.story.headline)
@@ -198,7 +199,7 @@ private struct LibraryStoryRow: View {
 
                 Text("\(record.story.region) · \(record.story.category)")
                     .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.signalSage)
+                    .foregroundStyle(accent)
 
                 HStack(spacing: 8) {
                     Text(record.story.confidence.rawValue)

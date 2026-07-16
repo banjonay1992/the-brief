@@ -55,7 +55,7 @@ struct TodayBriefingView: View {
             }
             .padding(20)
         }
-        .signalScreen()
+        .signalAtmosphere()
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
@@ -110,17 +110,18 @@ struct TodayBriefingView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .center, spacing: 8) {
+        VStack(alignment: .center, spacing: 10) {
+            Text(headerDateText)
+                .font(.caption.weight(.semibold))
+                .tracking(2.6)
+                .textCase(.uppercase)
+                .foregroundStyle(Color.signalMuted)
             CascadingText(
                 text: "Today’s Briefing",
-                font: .system(size: 36, weight: .regular, design: .serif),
+                font: .system(size: 40, weight: .regular, design: .serif),
                 color: .signalInk
             )
-            Text(headerDateText)
-                .font(.headline)
-                .foregroundStyle(Color.signalInk)
-                .multilineTextAlignment(.center)
-            Text("One calm global pass. Evidence first, no infinite feed.")
+            Text(DayPhase.current().tagline)
                 .font(.subheadline)
                 .foregroundStyle(Color.signalMuted)
                 .multilineTextAlignment(.center)
@@ -199,7 +200,7 @@ private extension TodayBriefingView {
         guard let date = Self.headerDateFormatter.date(from: dateText) else {
             return dateText
         }
-        return date.formatted(.dateTime.day().month(.wide).year())
+        return date.formatted(.dateTime.weekday(.wide).day().month(.wide))
     }
 
     static let headerDateFormatter: DateFormatter = {
@@ -299,7 +300,7 @@ private struct StoryQueueCarousel: View {
                     .contentMargins(.horizontal, max((proxy.size.width - cardWidth) / 2, 0), for: .scrollContent)
                     .scrollIndicators(.hidden)
                 }
-                .frame(height: 430)
+                .frame(height: 458)
 
                 if GlassDeckLayout.showsSwipeCue {
                     SwipeCueView(
@@ -376,14 +377,26 @@ private struct LeadStoryGlassCard: View {
     let onDone: () -> Void
     let onComment: () -> Void
 
+    private var accent: Color {
+        CategoryStyle.tint(for: story.category)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            VStack(alignment: .leading, spacing: 15) {
-                if GlassDeckLayout.showsCardOrdinal {
-                    Text(BriefingStatusText.cardOrdinal(index: index, total: total))
-                        .font(.caption2.weight(.semibold))
-                        .tracking(1.4)
-                        .foregroundStyle(Color.signalMuted.opacity(0.78))
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    Text("\(story.region) · \(story.category)")
+                        .font(.caption.weight(.semibold))
+                        .tracking(2.0)
+                        .textCase(.uppercase)
+                        .foregroundStyle(accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    Spacer(minLength: 8)
+                    Text(String(format: "%02d", index))
+                        .font(.system(size: 30, weight: .regular, design: .serif))
+                        .foregroundStyle(accent.opacity(0.32))
+                        .accessibilityLabel("Story \(index) of \(total)")
                 }
 
                 if let threadInfo {
@@ -391,21 +404,23 @@ private struct LeadStoryGlassCard: View {
                 }
 
                 Text(story.headline)
-                    .font(.system(size: 28, weight: .regular, design: .serif))
+                    .font(.system(size: 29, weight: .regular, design: .serif))
                     .foregroundStyle(Color.signalInk)
                     .lineSpacing(1)
                     .lineLimit(4)
-                    .minimumScaleFactor(0.82)
+                    .minimumScaleFactor(0.78)
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(story.summary)
-                        .lineLimit(2)
-                    Text(story.whyItMatters)
-                        .lineLimit(2)
-                }
-                .font(.system(size: 15))
-                .lineSpacing(2)
-                .foregroundStyle(Color.signalMuted)
+                Text(story.summary)
+                    .font(.system(size: 15))
+                    .lineSpacing(2)
+                    .foregroundStyle(Color.signalMuted)
+                    .lineLimit(2)
+
+                Text(story.whyItMatters)
+                    .font(.system(size: 15, design: .serif).italic())
+                    .lineSpacing(2)
+                    .foregroundStyle(Color.signalInk.opacity(0.72))
+                    .lineLimit(2)
             }
             .contentShape(Rectangle())
             .onTapGesture(perform: onMoreInformation)
@@ -413,18 +428,13 @@ private struct LeadStoryGlassCard: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .leading, spacing: 10) {
-                Text("\(story.region) · \(story.category)")
-                    .font(.caption.weight(.semibold))
-                    .tracking(0.8)
-                    .foregroundStyle(Color.signalSage)
-
                 Rectangle()
-                    .fill(Color.signalInk.opacity(0.14))
+                    .fill(accent.opacity(0.35))
                     .frame(height: 1)
 
                 HStack(spacing: 16) {
                     Text(story.confidence.rawValue)
-                        .foregroundStyle(Color.signalSage)
+                        .foregroundStyle(accent)
                     Rectangle()
                         .fill(Color.signalLine.opacity(0.75))
                         .frame(width: 1, height: 22)
@@ -453,9 +463,21 @@ private struct LeadStoryGlassCard: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 25)
-        .frame(maxWidth: .infinity, minHeight: 410, maxHeight: 410, alignment: .leading)
-        .signalGlassCard()
+        .padding(.vertical, 22)
+        .frame(maxWidth: .infinity, minHeight: 448, maxHeight: 448, alignment: .leading)
+        .signalGlassCard(tint: accent)
+        .overlay {
+            Color.clear
+                .overlay(alignment: .topTrailing) {
+                    Circle()
+                        .fill(accent.opacity(0.18))
+                        .frame(width: 190, height: 190)
+                        .blur(radius: 55)
+                        .offset(x: 55, y: -55)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .allowsHitTesting(false)
+        }
         .overlay {
             GeometryReader { proxy in
                 Color.clear
@@ -517,8 +539,14 @@ private struct BriefingQueueCompleteCard: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SealBadge()
-                .padding(.bottom, 18)
+            ZStack {
+                Circle()
+                    .fill(DayPhase.current().orb.opacity(0.40))
+                    .frame(width: 130, height: 130)
+                    .blur(radius: 34)
+                SealBadge(size: 84)
+            }
+            .padding(.bottom, 14)
 
             Text(RitualCopy.sealedTitle)
                 .font(.system(size: 30, weight: .regular, design: .serif))
