@@ -1,6 +1,16 @@
-# Signal Daily
+# The Brief
 
-Signal Daily is a calm, evidence-weighted iOS news briefing app. It gives users one finite global briefing per day with source transparency, framing checks, emotional-load controls, and explicit uncertainty.
+A calm, evidence-first daily news briefing for iPhone. Live on the App Store as **The Brief: Calm News**.
+
+The Brief gives you one finite briefing a day and then lets you leave it there. You choose your regions and topics, how many stories you want and how intense the coverage can be, and the app builds a short queue from current reporting. Every story shows what happened, why it matters, what is known and what is still uncertain, with its sources and a framing check.
+
+It is for people who want to stay informed without doom-scrolling. It is built with SwiftUI for iOS 17, a Cloudflare Worker and R2 for the news pipeline, and StoreKit 2 for the optional Plus subscription.
+
+The codebase started life as **Signal Daily**, so the Xcode targets, bundle ID and Worker still use that name. Renaming them is on the [roadmap](ROADMAP.md).
+
+## How it works
+
+An hourly Cloudflare Cron Trigger pulls public GDELT article discovery data, clusters and ranks stories, and writes briefing JSON to R2. The app never touches R2 directly: it calls the Worker API below, caches the latest briefing on disk for offline reading, and falls back to bundled mock data in debug builds.
 
 ## What is included
 
@@ -40,12 +50,18 @@ R2 can store objects behind that API at paths such as:
 - `/images/{imageId}.jpg`
 - `/sources/{sourceId}.json`
 
-## Local setup
+## Running it
+
+You need Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```sh
+brew install xcodegen
 xcodegen generate
+open SignalDaily.xcodeproj
 xcodebuild test -project SignalDaily.xcodeproj -scheme SignalDaily -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
+
+Debug builds use bundled mock data, so the app runs without any backend or keys.
 
 ## API wiring
 
@@ -77,3 +93,12 @@ Create one auto-renewable subscription in App Store Connect:
 - UK target price: `£0.99` or the nearest available App Store Connect price point
 
 The app uses StoreKit 2 to load products, purchase, restore purchases, and check current entitlements. Keep using App Store in-app purchase for this digital content subscription.
+
+## Tests
+
+- iOS: `xcodebuild test` (command above) covers JSON decoding, the reading ledger, cache persistence, subscriptions, the today view model and the neutrality guardrails.
+- Worker: `cd backend/worker && npm test` covers the API routes and the editorial scripts.
+
+## Licence
+
+MIT, see [LICENSE](LICENSE).
